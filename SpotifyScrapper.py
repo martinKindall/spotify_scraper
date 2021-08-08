@@ -10,6 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 import Utils
 from dataTypes.Song import Song
+from services.SongService import SongService
 
 baseURL = 'https://spotifycharts.com/regional/'
 countryList = ['cl', 'co', 'ar', 'pe', 'pr', 'uy', 've', 'ec', 'pa', 'mx', 'hn', 'gt', 'cr', 'do']
@@ -49,6 +50,7 @@ if __name__ == '__main__':
     driver = webdriver.Chrome(
         executable_path=r'C:\\webdrivers\\chromedriver.exe'
     )
+    songService = SongService()
     for country in countryList:
         for dateObj in dateRange:
             songs = list(SpotifyScrapper().requestAndObtainTopSongs(
@@ -56,4 +58,5 @@ if __name__ == '__main__':
                 dateObj.strftime("%Y-%m-%d"),
                 driver
             ))
-            print("Nombre de la 1: {}".format(songs[0].name))
+            for song in songs:
+                songService.save(song)
