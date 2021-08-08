@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Iterator
 
 from bs4 import BeautifulSoup
@@ -7,23 +8,20 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+import Utils
 from dataTypes.Song import Song
 
 baseURL = 'https://spotifycharts.com/regional/'
+countryList = ['cl', 'co', 'ar', 'pe', 'pr', 'uy', 've', 'ec', 'pa', 'mx', 'hn', 'gt', 'cr', 'do']
 
 
 class SpotifyScrapper:
 
-    def requestAndObtainTopSongs(self) -> Iterator[Song]:
-        driver = webdriver.Chrome(
-            executable_path=r'C:\\webdrivers\\chromedriver.exe'
-        )
-        country = 'co'
-        date = '2021-08-04'
+    def requestAndObtainTopSongs(self, country: str, date: str, driver) -> Iterator[Song]:
         driver.get(baseURL + '{}/daily/{}'.format(country, date))
         delay = 20
         try:
-            flyTabs = WebDriverWait(driver, delay).until(
+            WebDriverWait(driver, delay).until(
                 EC.presence_of_element_located((By.CLASS_NAME, 'chart-table')))
             generalDetails: BeautifulSoup = BeautifulSoup(driver.page_source, "html.parser")
             songsList = generalDetails.find('table', {'class': 'chart-table'}) \
@@ -46,6 +44,16 @@ class SpotifyScrapper:
 
 
 if __name__ == '__main__':
-    songs = list(SpotifyScrapper().requestAndObtainTopSongs())
-    import pdb; pdb.set_trace()
-    print("hi")
+
+    dateRange = Utils.generateMonthlyDateRange(date(2020, 1, 1), date(2021, 8, 1))
+    driver = webdriver.Chrome(
+        executable_path=r'C:\\webdrivers\\chromedriver.exe'
+    )
+    for country in countryList:
+        for dateObj in dateRange:
+            songs = list(SpotifyScrapper().requestAndObtainTopSongs(
+                country,
+                dateObj.strftime("%Y-%m-%d"),
+                driver
+            ))
+            print("Nombre de la 1: {}".format(songs[0].name))
