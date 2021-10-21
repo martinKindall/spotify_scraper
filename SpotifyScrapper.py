@@ -13,7 +13,8 @@ from dataTypes.Song import Song
 from services.SongService import SongService
 
 baseURL = 'https://spotifycharts.com/regional/'
-countryList = ['cl', 'co', 'ar', 'pe', 'pr', 'uy', 've', 'ec', 'pa', 'mx', 'hn', 'gt', 'cr', 'do']
+#countryList = ['cl', 'co', 'ar', 'pe', 'pr', 'uy', 've', 'ec', 'pa', 'mx', 'hn', 'gt', 'cr', 'do', 'es']
+countryList = ['ec', 'pa', 'mx', 'hn', 'gt', 'cr', 'do', 'es']
 
 
 class SpotifyScrapper:
@@ -38,15 +39,20 @@ class SpotifyScrapper:
 
     def parseSong(self, songRaw: BeautifulSoup, country: str, date: str) -> Song:
         nameAndArtist = songRaw.find('td', {'class': 'chart-table-track'})
-        name = nameAndArtist.find('strong').getText()
-        artist = nameAndArtist.find('span').getText()
+        name = nameAndArtist.find('strong').getText() \
+            .replace("\"", "")\
+            .strip()
+        artist = nameAndArtist.find('span').getText()\
+            .replace("by", "")\
+            .replace("\"", "")\
+            .strip()
         position = songRaw.find('td', {'class': 'chart-table-position'}).getText()
         return Song(int(position), name, artist, date, country)
 
 
 if __name__ == '__main__':
 
-    dateRange = Utils.generateMonthlyDateRange(date(2020, 1, 1), date(2021, 8, 1))
+    dateRange = Utils.generateMonthlyDateRange(date(2019, 1, 1), date(2021, 8, 1))
     driver = webdriver.Chrome(
         executable_path=r'C:\\webdrivers\\chromedriver.exe'
     )
